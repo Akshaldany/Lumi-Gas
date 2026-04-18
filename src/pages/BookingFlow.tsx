@@ -14,20 +14,25 @@ interface BookingFlowProps {
 export const BookingFlow = ({ onComplete }: BookingFlowProps) => {
   const [step, setStep] = useState(1);
   const [isBooking, setIsBooking] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const nextStep = () => setStep(prev => prev + 1);
+  const nextStep = () => {
+    setError(null);
+    setStep(prev => prev + 1);
+  };
 
   const handleCheckout = async () => {
     setIsBooking(true);
+    setError(null);
     try {
       const agencyId = localStorage.getItem('selected_agency_id');
-      if (!agencyId) throw new Error('No agency selected');
+      if (!agencyId) throw new Error('No agency selected. Please select a distributor first.');
       const res = await api.createBooking(agencyId);
       localStorage.setItem('active_booking_id', res.booking.id);
       onComplete();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Failed to create booking');
+      setError(err?.message || 'Failed to securely process your booking. Please verify your data connection and database permissions.');
     } finally {
       setIsBooking(false);
     }
@@ -200,8 +205,23 @@ export const BookingFlow = ({ onComplete }: BookingFlowProps) => {
                 </div>
               </CardContent>
             </Card>
+
+            <AnimatePresence>
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0, y: -10 }} 
+                  animate={{ opacity: 1, height: 'auto', y: 0 }} 
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mb-6 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-500 text-sm font-bold flex items-start space-x-3 overflow-hidden shadow-xl"
+                >
+                  <div className="w-5 h-5 rounded-full bg-rose-500/20 flex items-center justify-center shrink-0 mt-0.5">!</div>
+                  <span className="flex-1 leading-relaxed">{error}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <Button disabled={isBooking} className="w-full h-16 shadow-2xl orange-bg-gradient" size="lg" onClick={handleCheckout}>
-              {isBooking ? 'Processing...' : 'Securely Pay Now'}
+              {isBooking ? 'Processing Protocol...' : 'Securely Pay Now'}
             </Button>
           </motion.div>
         )}
