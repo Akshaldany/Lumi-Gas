@@ -66,6 +66,11 @@ export const AgencyFinder = ({ onSelect }: AgencyFinderProps) => {
 
         {loading ? (
           <div className="text-center p-10 text-gray-400">Searching agencies...</div>
+        ) : agencies.length === 0 ? (
+          <div className="text-center p-10 mt-10">
+            <Fuel className="w-10 h-10 mx-auto text-white/10 mb-4" />
+            <p className="text-xs font-black uppercase tracking-widest text-gray-500">No agencies found matching your criteria</p>
+          </div>
         ) : agencies.map((agency, idx) => {
           const status = agency.available_cylinders > 10 ? 'available' : agency.available_cylinders > 0 ? 'low_stock' : 'error';
           const statusText = status === 'available' ? 'Ready' : status === 'low_stock' ? `${agency.available_cylinders} Left` : 'Out of Stock';
