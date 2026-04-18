@@ -31,7 +31,7 @@ export const Auth = ({ onLogin }: AuthProps) => {
       } else {
         const res = await api.register(name, email, password);
         if (!res.ok) throw new Error(res.data.message || 'Registration failed');
-        
+
         // Auto login after register
         const loginRes = await api.login(email, password);
         if (!loginRes.ok) throw new Error('Registration successful, but auto-login failed');
@@ -58,7 +58,7 @@ export const Auth = ({ onLogin }: AuthProps) => {
       >
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-white/[0.05] rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10 shadow-2xl">
-             <Fuel className="w-8 h-8 text-brand-primary" />
+            <Fuel className="w-8 h-8 text-brand-primary" />
           </div>
           <h1 className="text-3xl font-black text-white">LumiGas Premium</h1>
           <p className="text-gray-500 font-medium mt-2">Sign in to book your next refill.</p>
@@ -66,69 +66,69 @@ export const Auth = ({ onLogin }: AuthProps) => {
 
         <Card className="p-0 border-white/[0.05] overflow-hidden">
           <CardContent className="p-8">
-             <div className="flex bg-white/[0.05] p-1 rounded-xl mb-8">
-                <button
-                  type="button"
-                  onClick={() => setIsLogin(true)}
-                  className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${isLogin ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
-                >
-                  Log In
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsLogin(false)}
-                  className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${!isLogin ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
-                >
-                  Sign Up
-                </button>
-             </div>
+            <div className="flex bg-white/[0.05] p-1 rounded-xl mb-8">
+              <button
+                type="button"
+                onClick={() => setIsLogin(true)}
+                className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${isLogin ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+              >
+                Log In
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsLogin(false)}
+                className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${!isLogin ? 'bg-brand-primary text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
+              >
+                Sign Up
+              </button>
+            </div>
 
-             <form onSubmit={handleSubmit} className="space-y-5">
-                <AnimatePresence mode="popLayout">
-                  {!isLogin && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                    >
-                      <Input
-                        label="Full Name"
-                        placeholder="Harvey Specter"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        icon={<User className="w-4 h-4 text-gray-500" />}
-                        required={!isLogin}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <AnimatePresence mode="popLayout">
+                {!isLogin && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                  >
+                    <Input
+                      label="Full Name"
+                      placeholder="John Doe"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      icon={<User className="w-4 h-4 text-gray-500" />}
+                      required={!isLogin}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-                <Input
-                  label="Email Address"
-                  type="email"
-                  placeholder="harvey@pearsonhardman.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  icon={<Mail className="w-4 h-4 text-gray-500" />}
-                  required
-                />
+              <Input
+                label="Email Address"
+                type="email"
+                placeholder="john@gmail.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                icon={<Mail className="w-4 h-4 text-gray-500" />}
+                required
+              />
 
-                <Input
-                  label="Password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  icon={<Lock className="w-4 h-4 text-gray-500" />}
-                  required
-                />
+              <Input
+                label="Password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                icon={<Lock className="w-4 h-4 text-gray-500" />}
+                required
+              />
 
-                {error && <p className="text-rose-500 text-xs font-bold">{error}</p>}
+              {error && <p className="text-rose-500 text-xs font-bold">{error}</p>}
 
-                <Button type="submit" disabled={loading} className="w-full h-14 mt-4 shadow-xl text-lg font-bold">
-                  {loading ? 'Processing...' : isLogin ? 'Access Account' : 'Create Account'}
-                </Button>
-             </form>
+              <Button type="submit" disabled={loading} className="w-full h-14 mt-4 shadow-xl text-lg font-bold">
+                {loading ? 'Processing...' : isLogin ? 'Access Account' : 'Create Account'}
+              </Button>
+            </form>
           </CardContent>
         </Card>
       </motion.div>
