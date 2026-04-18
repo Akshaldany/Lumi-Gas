@@ -1,70 +1,96 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+import { supabase } from './supabase';
 
-// Simple api helper to manage auth token and json parsing
 export const api = {
   getToken: () => localStorage.getItem('token'),
   setToken: (token: string) => localStorage.setItem('token', token),
-  
-  getAuthHeaders: () => {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    const token = localStorage.getItem('token');
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
-  },
 
   async login(email: string, password: string = 'password123') {
-    const res = await fetch(`${API_BASE_URL}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    const data = await res.json();
-    if (res.ok) this.setToken(data.token);
-    return { ok: res.ok, data };
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { ok: false, data: { message: error.message } };
+    
+    this.setToken(data.session.access_token);
+    return { ok: true, data: { user: { id: data.user.id, name: data.user.user_metadata?.name || email, email } } };
   },
 
   async register(name: string, email: string, password: string = 'password123') {
-    const res = await fetch(`${API_BASE_URL}/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password })
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name } }
     });
-    return { ok: res.ok, data: await res.json() };
+    
+    if (error) return { ok: false, data: { message: error.message } };
+    return { ok: true, data: { user: { id: data.user?.id, name, email } } };
   },
 
   async getAgencies(location?: string, available_only?: boolean) {
-    let url = `${API_BASE_URL}/agencies?`;
-    if (location) url += `location=${encodeURIComponent(location)}&`;
-    if (available_only) url += `available_only=true&`;
+    let query = supabase.from('agencies').select('*');
+    if (location) query = query.ilike('location', `%${location}%`);
+    if (available_only) query = query.gt('available_cylinders', 0);
     
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('Failed to fetch agencies');
-    return res.json();
+    const { data, error } = await query;
+    if (error) throw error;
+    return data;
   },
 
   async createBooking(agency_id: string) {
-    const res = await fetch(`${API_BASE_URL}/bookings`, {
-      method: 'POST',
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify({ agency_id })
-    });
-    if (!res.ok) throw new Error('Failed to create booking');
-    return res.json();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
+    // Reduce inventory directly from frontend
+    const { data: agency } = await supabase.from('agencies').select('available_cylinders').eq('id', agency_id).single();
+    if (agency && agency.available_cylinders > 0) {
+      await supabase.from('agencies').update({ available_cylinders: agency.available_cylinders - 1 }).eq('id', agency_id);
+      await supabase.from('inventory_logs').insert([{ agency_id, change_amount: -1, reason: `Booking by ${user.id}` }]);
+    } else {
+      throw new Error('Agency out of stock');
+    }
+
+    // Create Booking
+    const { data: booking, error } = await supabase
+      .from('bookings')
+      .insert([{ user_id: user.id, agency_id, status: 'Booked' }])
+      .select('*')
+      .single();
+
+    if (error) throw error;
+
+    // Simulate backend delivery workflow locally in the browser
+    this.startLocalMockWorkflow(booking.id);
+
+    return { booking };
+  },
+
+  startLocalMockWorkflow(bookingId: string) {
+    const update = async (status: string, isFinal = false) => {
+      const updateData: any = { status };
+      if (isFinal) updateData.delivery_date = new Date().toISOString();
+      await supabase.from('bookings').update(updateData).eq('id', bookingId);
+    };
+
+    setTimeout(() => update('Confirmed'), 2 * 60 * 1000);
+    setTimeout(() => update('Dispatched'), 5 * 60 * 1000);
+    setTimeout(() => update('Out for Delivery'), 8 * 60 * 1000);
+    setTimeout(() => update('Delivered', true), 12 * 60 * 1000);
   },
 
   async getBooking(id: string) {
-    const res = await fetch(`${API_BASE_URL}/bookings/${id}`, {
-      headers: this.getAuthHeaders()
-    });
-    if (!res.ok) throw new Error('Failed to fetch booking');
-    return res.json();
+    const { data, error } = await supabase.from('bookings').select('*, agencies(*)').eq('id', id).single();
+    if (error) throw error;
+    return data;
   },
 
   async getBookings() {
-    const res = await fetch(`${API_BASE_URL}/bookings/user/me`, {
-      headers: this.getAuthHeaders()
-    });
-    if (!res.ok) throw new Error('Failed to fetch bookings');
-    return res.json();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('*, agencies(*)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+    return data;
   }
 };
