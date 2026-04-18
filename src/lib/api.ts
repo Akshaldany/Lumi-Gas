@@ -31,17 +31,6 @@ export const api = {
     });
     return { ok: res.ok, data: await res.json() };
   },
-  
-  async ensureMockUser() {
-    // For demo purposes, auto-register/login a dummy user if not authenticated
-    if (this.getToken()) return;
-    const email = 'user@example.com';
-    const res = await this.login(email);
-    if (!res.ok) {
-      await this.register('Demo User', email);
-      await this.login(email);
-    }
-  },
 
   async getAgencies(location?: string, available_only?: boolean) {
     let url = `${API_BASE_URL}/agencies?`;
@@ -54,7 +43,6 @@ export const api = {
   },
 
   async createBooking(agency_id: string) {
-    await this.ensureMockUser();
     const res = await fetch(`${API_BASE_URL}/bookings`, {
       method: 'POST',
       headers: this.getAuthHeaders(),
@@ -65,7 +53,6 @@ export const api = {
   },
 
   async getBooking(id: string) {
-    await this.ensureMockUser();
     const res = await fetch(`${API_BASE_URL}/bookings/${id}`, {
       headers: this.getAuthHeaders()
     });
@@ -74,7 +61,6 @@ export const api = {
   },
 
   async getBookings() {
-    await this.ensureMockUser();
     const res = await fetch(`${API_BASE_URL}/bookings/user/me`, {
       headers: this.getAuthHeaders()
     });

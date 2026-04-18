@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/src/components/ui/Card';
 import { Button } from '@/src/components/ui/Button';
 import { Badge } from '@/src/components/ui/Badge';
@@ -14,9 +14,11 @@ import {
   Truck, 
   Flame,
   ArrowRight,
-  Navigation
+  Navigation,
+  CheckCircle as CheckCircleIcon
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import { api } from '@/src/lib/api';
 
 interface DashboardProps {
   onBook: () => void;
@@ -26,6 +28,20 @@ interface DashboardProps {
 }
 
 export const Dashboard = ({ onBook, onTrack, onViewAgencies, onViewHistory }: DashboardProps) => {
+  const [user, setUser] = useState<any>(null);
+  const [recentBookings, setRecentBookings] = useState<any[]>([]);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) setUser(JSON.parse(storedUser));
+    
+    api.getBookings().then(data => {
+        if (data && Array.isArray(data)) {
+            setRecentBookings(data.slice(0, 3)); // show top 3
+        }
+    }).catch(console.error);
+  }, []);
+
   return (
     <div className="space-y-10 pb-12">
       {/* Top Welcome Section */}
@@ -36,7 +52,7 @@ export const Dashboard = ({ onBook, onTrack, onViewAgencies, onViewHistory }: Da
             animate={{ opacity: 1, x: 0 }}
             className="text-4xl font-bold tracking-tight text-white mb-1"
            >
-            Good evening, <span className="orange-text-gradient">Harvey</span>
+            Good evening, <span className="orange-text-gradient">{user?.name?.split(' ')[0] || 'Guest'}</span>
            </motion.h2>
            <p className="text-gray-500 font-medium">Your next refill is predicted in <span className="text-gray-300">12 days</span>.</p>
         </div>
@@ -204,24 +220,23 @@ export const Dashboard = ({ onBook, onTrack, onViewAgencies, onViewHistory }: Da
         <h3 className="text-xl font-black uppercase tracking-widest text-gray-400 px-2">Recent Activity</h3>
         <Card className="p-2 border-white/[0.03]">
            <div className="space-y-1">
-              {[
-                { id: 'LM-10923', status: 'delivered', date: 'Oct 14', cost: '₹920' },
-                { id: 'LM-10924', status: 'in_progress', date: 'Processing', cost: '₹915' },
-              ].map((booking, i) => (
-                <div key={i} className="flex items-center justify-between p-5 rounded-xl hover:bg-white/[0.03] transition-colors group cursor-pointer">
+              {recentBookings.length === 0 ? (
+                <div className="p-5 text-gray-500 text-sm font-bold text-center">No recent bookings</div>
+              ) : recentBookings.map((booking, i) => (
+                <div key={i} className="flex items-center justify-between p-5 rounded-xl hover:bg-white/[0.03] transition-colors group cursor-pointer" onClick={onTrack}>
                    <div className="flex items-center space-x-5">
                       <div className="w-12 h-12 rounded-2xl bg-white/[0.03] flex items-center justify-center border border-white/5 group-hover:bg-brand-primary/10 transition-colors">
-                         {booking.status === 'delivered' ? <CheckCircle className="w-5 h-5 text-emerald-400" /> : <Truck className="w-5 h-5 text-brand-primary animate-pulse" />}
+                         {booking.status === 'Delivered' ? <CheckCircleIcon className="w-5 h-5 text-emerald-400" /> : <Truck className="w-5 h-5 text-brand-primary animate-pulse" />}
                       </div>
                       <div>
-                         <p className="font-bold font-mono text-xs text-gray-200">{booking.id}</p>
-                         <p className="text-sm text-gray-500 font-medium">LPG Refill • 14.2 kg</p>
+                         <p className="font-bold font-mono text-xs text-gray-200">{(booking.id || '').slice(0,8).toUpperCase()}</p>
+                         <p className="text-sm text-gray-500 font-medium">LPG Refill • {new Date(booking.created_at).toLocaleDateString()}</p>
                       </div>
                    </div>
                    <div className="text-right">
-                      <p className="text-sm font-black text-white">{booking.cost}</p>
-                      <p className={`text-[10px] font-black uppercase tracking-widest ${booking.status === 'delivered' ? 'text-emerald-500' : 'text-brand-primary'}`}>
-                         {booking.status.replace('_', ' ')}
+                      <p className="text-sm font-black text-white">₹920</p>
+                      <p className={`text-[10px] font-black uppercase tracking-widest ${booking.status === 'Delivered' ? 'text-emerald-500' : 'text-brand-primary'}`}>
+                         {booking.status}
                       </p>
                    </div>
                 </div>
@@ -233,8 +248,3 @@ export const Dashboard = ({ onBook, onTrack, onViewAgencies, onViewHistory }: Da
   );
 };
 
-const CheckCircle = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dashboard } from './pages/Dashboard';
 import { AgencyFinder } from './pages/AgencyFinder';
 import { BookingFlow } from './pages/BookingFlow';
@@ -14,11 +14,44 @@ import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { BottomNav } from './components/layout/BottomNav';
 import { AnimatePresence, motion } from 'motion/react';
+import { Auth } from './pages/Auth';
+import { api } from './lib/api';
 
 export type Page = 'dashboard' | 'agencies' | 'history' | 'profile' | 'tracking' | 'booking';
 
 export default function App() {
   const [page, setPage] = useState<Page>('dashboard');
+  const [user, setUser] = useState<any>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  useEffect(() => {
+    // Attempt to hydrate user from local storage or api
+    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+    
+    if (storedUser && token) {
+      // Typically we'd fetch fresh user data here to validate token
+      setUser(JSON.parse(storedUser));
+    }
+    setIsInitializing(false);
+  }, []);
+
+  const handleLogin = (u: any) => {
+    setUser(u);
+    localStorage.setItem('user', JSON.stringify(u));
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+  };
+
+  if (isInitializing) return <div className="min-h-screen bg-brand-bg flex items-center justify-center p-4"><p className="text-gray-500 font-black tracking-widest text-[10px] uppercase">Loading Workspace...</p></div>;
+
+  if (!user) {
+    return <Auth onLogin={handleLogin} />;
+  }
 
   return (
     <div className="flex min-h-screen bg-brand-bg text-gray-100 overflow-hidden">
