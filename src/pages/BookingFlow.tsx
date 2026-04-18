@@ -199,9 +199,6 @@ export const BookingFlow = ({ onComplete }: BookingFlowProps) => {
                         <div className="w-1.5 h-1.5 rounded-full bg-brand-primary" />
                      </div>
                   </button>
-                  <Button variant="outline" className="w-full border-dashed py-4 border-white/10 hover:border-brand-primary/30">
-                    Add Legacy Payment Method
-                  </Button>
                 </div>
               </CardContent>
             </Card>
