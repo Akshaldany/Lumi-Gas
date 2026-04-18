@@ -1,12 +1,20 @@
 import { Bell, Search, Menu, Flame } from 'lucide-react';
 import { Page } from '@/src/App';
 import { motion } from 'motion/react';
+import React, { useEffect, useState } from 'react';
 
 interface HeaderProps {
   currentPage: Page;
 }
 
 export const Header = ({ currentPage }: HeaderProps) => {
+  const [user, setUser] = useState<any>(null);
+  
+  useEffect(() => {
+    const stored = localStorage.getItem('user');
+    if (stored) setUser(JSON.parse(stored));
+  }, []);
+
   const titles: Record<Page, string> = {
     dashboard: 'Dashboard',
     agencies: 'Find Agencies',
@@ -45,16 +53,13 @@ export const Header = ({ currentPage }: HeaderProps) => {
           </button>
 
           <div className="flex items-center space-x-4 pl-4 border-l border-white/[0.08]">
-            <div className="text-right hidden sm:block">
-              <p className="text-xs font-black text-white uppercase tracking-wider">Harvey S.</p>
-              <div className="flex items-center justify-end">
-                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 shadow-[0_0_8px_rgba(16,185,129,0.3)]" />
-                 <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Premium</p>
-              </div>
+            <div className="text-right mr-4 hidden sm:block">
+              <p className="text-xs font-black text-white uppercase tracking-wider">{user?.name || 'Guest'}</p>
+              <p className="text-[9px] font-black text-emerald-500 tracking-widest uppercase flex items-center justify-end"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" /> PREMIUM</p>
             </div>
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#FF6A00] to-[#FF8C42] p-[1.5px] shadow-lg shadow-brand-primary/10">
-              <div className="w-full h-full rounded-[14.5px] bg-gray-900 flex items-center justify-center text-[10px] font-black tracking-tighter">
-                HS
+            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gray-800 to-gray-900 border-2 border-brand-primary p-0.5 relative overflow-hidden group cursor-pointer shadow-lg shadow-brand-primary/20">
+              <div className="w-full h-full rounded-full bg-brand-bg flex items-center justify-center relative overflow-hidden">
+                 <span className="font-black text-base italic text-white mix-blend-difference z-10">{(user?.name || 'GS')?.slice(0, 2).toUpperCase()}</span>
               </div>
             </div>
           </div>

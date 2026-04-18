@@ -1,11 +1,22 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/src/components/ui/Card';
 import { Button } from '@/src/components/ui/Button';
 import { Input } from '@/src/components/ui/Input';
 import { Badge } from '@/src/components/ui/Badge';
 import { User, MapPin, CreditCard, Bell, Shield, LogOut, ChevronRight, Camera } from 'lucide-react';
 
-export const Profile = () => {
+interface ProfileProps {
+  onLogout?: () => void;
+}
+
+export const Profile = ({ onLogout }: ProfileProps) => {
+  const [user, setUser] = useState<any>(null);
+  
+  useEffect(() => {
+    const stored = localStorage.getItem('user');
+    if (stored) setUser(JSON.parse(stored));
+  }, []);
+
   return (
     <div className="max-w-4xl mx-auto space-y-10 pb-12">
       <div className="flex flex-col md:flex-row items-center gap-8 bg-brand-surface p-10 rounded-[32px] border border-white/[0.05] relative overflow-hidden">
@@ -14,7 +25,7 @@ export const Profile = () => {
         <div className="relative group">
            <div className="w-32 h-32 rounded-[40px] bg-gradient-to-tr from-[#FF6A00] to-[#FF8C42] p-1 shadow-2xl shadow-brand-primary/20 transition-transform duration-500 group-hover:scale-105">
               <div className="w-full h-full rounded-[36px] bg-gray-900 flex items-center justify-center text-4xl font-black italic text-white overflow-hidden">
-                 <img src="https://picsum.photos/seed/harvey/200/200" alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                 <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.name || 'Guest'}`} alt="Avatar" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
               </div>
            </div>
            <button className="absolute bottom-1 right-1 w-10 h-10 rounded-2xl bg-brand-bg border border-white/10 flex items-center justify-center text-gray-400 hover:text-brand-primary transition-colors shadow-xl">
@@ -24,10 +35,10 @@ export const Profile = () => {
 
         <div className="text-center md:text-left space-y-3 relative z-10">
            <div className="flex flex-col md:flex-row items-center gap-3">
-              <h2 className="text-3xl font-bold tracking-tight text-white">Harvey Specter</h2>
+              <h2 className="text-3xl font-bold tracking-tight text-white">{user?.name || 'Guest User'}</h2>
               <Badge variant="warning" className="px-3 py-1">Premium Client</Badge>
            </div>
-           <p className="text-gray-500 font-medium tracking-wide">harvey.specter@pearsonhardman.com</p>
+           <p className="text-gray-500 font-medium tracking-wide">{user?.email || 'guest@example.com'}</p>
            <div className="flex items-center justify-center md:justify-start space-x-6 pt-2">
               <div className="text-center md:text-left">
                  <p className="text-[10px] font-black uppercase tracking-widest text-gray-600 mb-0.5">Member Since</p>
@@ -61,7 +72,7 @@ export const Profile = () => {
            ))}
            
            <div className="pt-6">
-              <button className="w-full flex items-center justify-center space-x-3 p-5 rounded-2xl bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white transition-all font-black uppercase tracking-widest text-[10px] border border-rose-500/10">
+              <button onClick={onLogout} className="w-full flex items-center justify-center space-x-3 p-5 rounded-2xl bg-rose-500/5 text-rose-500 hover:bg-rose-500 hover:text-white transition-all font-black uppercase tracking-widest text-[10px] border border-rose-500/10">
                  <LogOut className="w-4 h-4" />
                  <span>Terminate Session</span>
               </button>
@@ -73,9 +84,9 @@ export const Profile = () => {
               <CardContent className="p-10 space-y-8">
                  <h3 className="text-xl font-bold mb-8">Personal Information</h3>
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <Input label="First Name" defaultValue="Harvey" />
-                    <Input label="Last Name" defaultValue="Specter" />
-                    <Input label="Account ID" defaultValue="LM-88291-P" readOnly />
+                    <Input label="First Name" defaultValue={user?.name?.split(' ')[0] || ''} />
+                    <Input label="Last Name" defaultValue={user?.name?.split(' ').slice(1).join(' ') || ''} />
+                    <Input label="Email" defaultValue={user?.email || ''} readOnly />
                     <Input label="Phone Number" defaultValue="+1 (555) 000-0000" />
                  </div>
                  <div className="pt-6">

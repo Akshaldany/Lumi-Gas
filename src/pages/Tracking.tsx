@@ -21,7 +21,10 @@ export const Tracking = () => {
     const fetchStatus = async () => {
       try {
         const id = localStorage.getItem('active_booking_id');
-        if (!id) return;
+        if (!id) {
+          if (active) setLoading(false);
+          return;
+        }
         const data = await api.getBooking(id);
         if (active) {
             setBooking(data);
@@ -59,7 +62,8 @@ export const Tracking = () => {
     { label: 'Delivered', time: 'Phase 4', status: getStepStatus('Delivered') },
   ];
 
-  if (loading) return <div className="text-center p-10">Loading tracking details...</div>;
+  if (loading) return <div className="text-center p-10"><span className="text-xs uppercase tracking-widest font-black text-gray-500 animate-pulse">Loading tracking details...</span></div>;
+  if (!booking) return <div className="text-center p-10"><span className="text-xs uppercase tracking-widest font-black text-gray-500">No Active Bookings Found</span></div>;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
