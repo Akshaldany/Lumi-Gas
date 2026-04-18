@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-bg: #0B0B0D;
+  --color-brand-primary: #FF6A00;
+  --color-brand-secondary: #FF8C42;
+  --color-brand-surface: #121214;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+}
+
+@layer base {
+  body {
+    @apply bg-brand-bg text-gray-100 antialiased font-sans transition-colors duration-300;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/[0.03] backdrop-blur-2xl border border-white/[0.05] shadow-2xl;
+  }
+
+  .glass-card {
+    @apply bg-gradient-to-br from-white/[0.04] to-transparent backdrop-blur-xl border border-white/[0.08] shadow-[0_8px_32px_rgba(0,0,0,0.4)];
+  }
+
+  .orange-glow {
+    @apply shadow-[0_0_30px_rgba(255,106,0,0.15)];
+  }
+
+  .orange-text-gradient {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-[#FF6A00] to-[#FF8C42];
+  }
+
+  .orange-bg-gradient {
+    @apply bg-gradient-to-r from-[#FF6A00] to-[#FF8C42];
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-white/10 rounded-full hover:bg-brand-primary/30 transition-colors;
+}
+
+@keyframes pulse-orange {
+  0% { box-shadow: 0 0 0 0 rgba(255, 106, 0, 0.4); }
+  70% { box-shadow: 0 0 0 15px rgba(255, 106, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 106, 0, 0); }
+}
+
+.animate-pulse-orange {
+  animation: pulse-orange 2s infinite;
+}
