@@ -36,7 +36,7 @@ export const Tracking = () => {
     };
     
     fetchStatus();
-    const interval = setInterval(fetchStatus, 30000); // poll every 30s
+    const interval = setInterval(fetchStatus, 2000); // poll every 2s
     return () => { active = false; clearInterval(interval); };
   }, []);
 

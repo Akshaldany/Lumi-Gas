@@ -117,10 +117,10 @@ export const api = {
       await supabase.from('bookings').update(updateData).eq('id', bookingId);
     };
 
-    setTimeout(() => update('Confirmed'), 2 * 60 * 1000);
-    setTimeout(() => update('Dispatched'), 5 * 60 * 1000);
-    setTimeout(() => update('Out for Delivery'), 8 * 60 * 1000);
-    setTimeout(() => update('Delivered', true), 12 * 60 * 1000);
+    setTimeout(() => update('Confirmed'), 5000); // 5s
+    setTimeout(() => update('Dispatched'), 10000); // 10s
+    setTimeout(() => update('Out for Delivery'), 15000); // 15s
+    setTimeout(() => update('Delivered', true), 20000); // 20s
   },
 
   async getBooking(id: string) {
