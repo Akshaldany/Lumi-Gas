@@ -32,10 +32,11 @@ export const Auth = ({ onLogin }: AuthProps) => {
         const res = await api.register(name, email, password);
         if (!res.ok) throw new Error(res.data.message || 'Registration failed');
 
-        // Auto login after register
-        const loginRes = await api.login(email, password);
-        if (!loginRes.ok) throw new Error('Registration successful, but auto-login failed');
-        onLogin(loginRes.data.user);
+        if (res.requiresVerification) {
+          throw new Error('Registration successful! Please check your email to verify your account.');
+        } else {
+          onLogin(res.data.user);
+        }
       }
     } catch (err: any) {
       setError(err.message);

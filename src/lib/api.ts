@@ -20,7 +20,13 @@ export const api = {
     });
     
     if (error) return { ok: false, data: { message: error.message } };
-    return { ok: true, data: { user: { id: data.user?.id, name, email } } };
+    
+    if (data.session) {
+      this.setToken(data.session.access_token);
+      return { ok: true, requiresVerification: false, data: { user: { id: data.user?.id, name, email } } };
+    }
+    
+    return { ok: true, requiresVerification: true, data: { user: { id: data.user?.id, name, email } } };
   },
 
   async getAgencies(location?: string, available_only?: boolean) {
